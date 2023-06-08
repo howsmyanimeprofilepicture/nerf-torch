@@ -7,7 +7,13 @@
 Originally Tiny NeRF dataset was provided by UC Berkely EECS before. However currently UC Berkely does NOT provide this dataset. I don't know the reason why. So instead of the UC Berkely's link, I will use the link that UC San Diego provides for a while.
 
 ```bash
+# clone this repo
+git clone https://github.com/howsmyanimeprofilepicture/nerf-torch
+cd ./nerf-torch
+# Download Tiny NeRF Dataset from the UCSD's server.
 wget https://cseweb.ucsd.edu//~viscomp/projects/LF/papers/ECCV20/nerf/tiny_nerf_data.npz
+python ./main.py
+
 ```
 
 ## References
