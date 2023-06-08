@@ -1,3 +1,4 @@
+import torch.nn.functional as F
 from .utils import Config, positional_encoder
 import torch
 import torch.nn as nn
@@ -51,19 +52,15 @@ class Nerf(torch.nn.Module):
                       config.filter_size),
             nn.ReLU(),
             nn.Linear(config.filter_size,
-                      config.filter_size),
-            nn.ReLU(),
+                      config.filter_size + 1),
         )
 
         self.layer3 = nn.Sequential(
             nn.Linear(config.filter_size + dir_enc_dim,
-                      config.filter_size),
-            nn.ReLU(),
-            nn.Linear(config.filter_size,
                       config.filter_size//2),
             nn.ReLU(),
             nn.Linear(config.filter_size//2,
-                      4),
+                      3),
         )
         self.to(device=config.device)
 
@@ -84,13 +81,16 @@ class Nerf(torch.nn.Module):
         d_vals = positional_encoder(d_vals, L_d)
 
         h = self.layer1(r_vals)
-        h = self.layer2(torch.cat([h, r_vals],
+        h_and_sigma = self.layer2(torch.cat([h, r_vals],
                                   dim=-1))
-        pred = self.layer3(torch.cat([h, d_vals],
-                                     dim=-1))
-        pred = pred.reshape(H, W, num_samples, 4)
-        rgb = pred[..., :3]
-        sigma = pred[..., 3]
+        h = h_and_sigma[..., :-1]
+        sigma = h_and_sigma[..., -1]
+        sigma = F.relu(sigma)
+        sigma = sigma.reshape(H, W, num_samples)
+
+        rgb = self.layer3(torch.cat([h, d_vals],
+                                    dim=-1))
         rgb = torch.sigmoid(rgb)
-        sigma = nn.functional.relu(sigma)
+        rgb = rgb.reshape(H, W, num_samples, 3)
+
         return (rgb, sigma)
