@@ -21,9 +21,9 @@ def main():
         near_thresh=2.0,
         far_thresh=6.0,
         num_samples=32,
-        lr=0.0002,
+        lr=0.0001,
         num_iters=1000,
-        seed=9458,
+        seed=42,
         filter_size=256,
         L_origin=10,
         L_direction=4,
@@ -67,6 +67,7 @@ def main():
          tgt_pose) = data.sample_trainset()
         rgb_predicted, _ = infer_rgb(tgt_pose,
                                      **infer_kwargs)
+        print(rgb_predicted.sum())
         loss = F.mse_loss(
             rgb_predicted,
             tgt_img,
